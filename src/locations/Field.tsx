@@ -44,18 +44,17 @@ const Field = () => {
 
   const handleOnChange = (event:any) => {
     setSelectValue(event.target.value)
-    const selectedEntry: any = entries.find((entry:any) => entry.sys.id === event.target.value)
-    const reference = {
+
+    sdk.field.setValue({
       sys: {
-        id: selectedEntry.sys.id,
+        id: event.target.value,
         linkType: "Entry",
         type: "Link"
       }
+    }).then(() => {
+        console.log('selected')
+      })
     }
-    sdk.field.setValue(reference).then(data => {
-      console.log('selected')
-    })
-  }
 
   return (
       <div>
