@@ -7,6 +7,7 @@ const Field = () => {
   const [entries, setEntries] = useState([])
   const [selectValue, setSelectValue] = useState('')
   const [defaultLocale, setDefaultLocale] = useState('')
+  const [displayField, setDisplayField] = useState('')
   const sdk = useSDK<FieldExtensionSDK>();
   const cma = useCMA();
 
@@ -17,24 +18,30 @@ const Field = () => {
     const linkContentTypes = sdk.field.validations[0].linkContentType
     const entityType = (linkContentTypes) ? linkContentTypes[0] : ''
 
-    // get current field value if exists
-    if(sdk.field.getValue()) {
-      Promise.resolve(cma.entry.get({
-        entryId: sdk.field.getValue().sys.id
-      })).then(data => {
-        setSelectValue(data.sys.id)
+    const init : any = async () => {
+      //Retrieve the ContentType defintion to get displayField
+      const df = await cma.contentType.get({
+        contentTypeId: entityType
       })
+      setDisplayField(df.displayField)
+
+      const fv:any = await cma.entry.get({
+        entryId: sdk.field.getValue().sys.id
+      })
+      setSelectValue(fv.sys.id)
+
+      const entries: any = await cma.entry.getPublished({
+        query: {
+          content_type: entityType,
+          order: `fields.${df.displayField}`
+        }
+      })
+      setEntries(entries.items)
     }
 
-    Promise.resolve(cma.entry.getPublished({
-      query: {
-        content_type: entityType,
-        order: 'fields.label'
-      }
-    }))
-        .then((data:any) => {
-          setEntries(data.items)
-        })
+
+    if(sdk.field.getValue()) init()
+
     return () => {
       sdk.window.stopAutoResizer();
     };
@@ -53,14 +60,28 @@ const Field = () => {
       }
     }).then(() => {
         console.log('selected')
-      })
+    })
+  }
+
+  const optionLabel = (entry:any) => {
+    if(entry.fields.label) {
+      if(entry.fields.label[sdk.field.locale] ) return entry.fields.label[sdk.field.locale]
+      else return entry.fields.label[defaultLocale]
     }
+    if(entry.fields.title) {
+      if(entry.fields.title[sdk.field.locale] ) return entry.fields.title[sdk.field.locale]
+      else return entry.fields.title[defaultLocale]
+    }
+
+    if(entry.fields[displayField][sdk.field.locale] ) return entry.fields[displayField][sdk.field.locale]
+    else return entry.fields[displayField][defaultLocale]
+  }
 
   return (
       <div>
         <Select id={sdk.field.id} name={sdk.field.id} value={selectValue} onChange={handleOnChange}>
           {entries.map((entry:any) => (
-              <Select.Option key={entry.sys.id} value={entry.sys.id}>{entry.fields.label[sdk.field.locale] ? entry.fields.label[sdk.field.locale] : entry.fields.label[defaultLocale]}</Select.Option>
+              <Select.Option key={entry.sys.id} value={entry.sys.id}>{optionLabel(entry)}</Select.Option>
           ))}
         </Select>
       </div>
