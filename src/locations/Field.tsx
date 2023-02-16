@@ -22,7 +22,7 @@ const Field = () => {
       Promise.resolve(cma.entry.get({
         entryId: sdk.field.getValue().sys.id
       })).then(data => {
-        setSelectValue(data.fields.value[sdk.locales.default])
+        setSelectValue(data.sys.id)
       })
     }
 
@@ -44,7 +44,7 @@ const Field = () => {
 
   const handleOnChange = (event:any) => {
     setSelectValue(event.target.value)
-    const selectedEntry: any = entries.find((entry:any) => entry.fields.value[defaultLocale] === event.target.value)
+    const selectedEntry: any = entries.find((entry:any) => entry.sys.id === event.target.value)
     const reference = {
       sys: {
         id: selectedEntry.sys.id,
@@ -61,7 +61,7 @@ const Field = () => {
       <div>
         <Select id={sdk.field.id} name={sdk.field.id} value={selectValue} onChange={handleOnChange}>
           {entries.map((entry:any) => (
-              <Select.Option key={entry.sys.id} value={entry.fields.value[defaultLocale]}>{entry.fields.label[sdk.field.locale] ? entry.fields.label[sdk.field.locale] : entry.fields.label[defaultLocale]}</Select.Option>
+              <Select.Option key={entry.sys.id} value={entry.sys.id}>{entry.fields.label[sdk.field.locale] ? entry.fields.label[sdk.field.locale] : entry.fields.label[defaultLocale]}</Select.Option>
           ))}
         </Select>
       </div>
