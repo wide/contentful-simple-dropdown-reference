@@ -1,83 +1,24 @@
 This project was bootstrapped with [Create Contentful App](https://github.com/contentful/create-contentful-app).
 
+This app is here to provide a custom and simple dropdown rendering for entry reference.
+It solves the issue explained here : https://stackoverflow.com/questions/67280282/how-can-i-set-different-label-and-value-for-dropdown-fields-in-contentful
+
 ## Install the app
 
 [![Install to Contentful](https://www.ctfstatic.com/button/install-small.svg)](https://app.contentful.com/deeplink?link=apps&id=6s62y3vRQADfGeyoP8bXCk)
 
-## How to use
+## Configuration
 
-Execute create-contentful-app with npm, npx or yarn to bootstrap the example:
+Once the app is installed:
 
-```bash
-# npx
-npx create-contentful-app --typescript
+1. Create a "Reference" field in the content type you want to use it.
+2. Define its type as "One reference" and validate.
+3. In the "Appeareance" tab, select "Simple dropdown reference"
+4. In "Validation" tab, select the content types you want to be retrieved in the dropdown list
+5. Click "Confirm", that's it
 
-# npm
-npm init contentful-app -- --typescript
+You should be able to see a dropdown list to select a reference in the related content entry.
 
-# Yarn
-yarn create contentful-app --typescript
-```
-
-## Available Scripts
-
-In the project directory, you can run:
-
-#### `npm start`
-
-Creates or updates your app definition in Contentful, and runs the app in development mode.
-Open your app to view it in the browser.
-
-The page will reload if you make edits.
-You will also see any lint errors in the console.
-
-#### `npm run build`
-
-Builds the app for production to the `build` folder.
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.
-Your app is ready to be deployed!
-
-#### `npm run upload`
-
-Uploads the build folder to contentful and creates a bundle that is automatically activated.
-The command guides you through the deployment process and asks for all required arguments.
-Read [here](https://www.contentful.com/developers/docs/extensibility/app-framework/create-contentful-app/#deploy-with-contentful) for more information about the deployment process.
-
-#### `npm run upload-ci`
-
-Similar to `npm run upload` it will upload your app to contentful and activate it. The only difference is   
-that with this command all required arguments are read from the environment variables, for example when you add
-the upload command to your CI pipeline.
-
-For this command to work, the following environment variables must be set: 
-
-- `CONTENTFUL_ORG_ID` - The ID of your organization
-- `CONTENTFUL_APP_DEF_ID` - The ID of the app to which to add the bundle
-- `CONTENTFUL_ACCESS_TOKEN` - A personal [access token](https://www.contentful.com/developers/docs/references/content-management-api/#/reference/personal-access-tokens)
-
-## Libraries to use
-
-To make your app look and feel like Contentful use the following libraries:
-
-- [Forma 36](https://f36.contentful.com/) – Contentful's design system
-- [Contentful Field Editors](https://www.contentful.com/developers/docs/extensibility/field-editors/) – Contentful's field editor React components
-
-## Using the `contentful-management` SDK
-
-In the default create contentful app output, a contentful management client is
-passed into each location. This can be used to interact with Contentful's
-management API. For example
-
-```js
-  // Use the client
-  cma.locale.getMany({}).then((locales) => console.log(locales))
-
-```
-
-Visit the [`contentful-management` documentation](https://www.contentful.com/developers/docs/extensibility/app-framework/sdk/#using-the-contentful-management-library)
-to find out more.
 
 ## Learn More
 
