@@ -7,7 +7,7 @@ const Field = () => {
   const [entries, setEntries] = useState([])
   const [selectValue, setSelectValue] = useState('')
   const [defaultLocale, setDefaultLocale] = useState('')
-  const [displayField, setDisplayField] = useState('')
+  const [displayFields, setDisplayFields] = useState([])
   const sdk = useSDK<FieldExtensionSDK>();
   const cma = useCMA();
 
@@ -15,15 +15,18 @@ const Field = () => {
     sdk.window.startAutoResizer();
     setDefaultLocale(sdk.locales.default)
 
-    const linkContentTypes = sdk.field.validations[0].linkContentType
-    const entityType = (linkContentTypes) ? linkContentTypes[0] : ''
+    const linkContentTypes: string[] = sdk.field.validations[0].linkContentType || []
 
     const init : any = async () => {
-      //Retrieve the ContentType defintion to get displayField
-      const df = await cma.contentType.get({
-        contentTypeId: entityType
-      })
-      setDisplayField(df.displayField)
+      let dfs: any = []
+      // retrieve displayField for each content type and store it into displayFields
+      for (const contentType of linkContentTypes) {
+        const df = await cma.contentType.get({
+          contentTypeId: contentType
+        })
+        dfs[contentType] = df.displayField
+      }
+      setDisplayFields(dfs)
 
       const fv:any = await cma.entry.get({
         entryId: sdk.field.getValue().sys.id
@@ -32,26 +35,22 @@ const Field = () => {
 
       const entries: any = await cma.entry.getPublished({
         query: {
-          content_type: entityType,
-          order: `fields.${df.displayField}`
+          'sys.contentType.sys.id[in]': linkContentTypes.join(',')
         }
       })
       setEntries(entries.items)
     }
-
 
     if(sdk.field.getValue()) init()
 
     return () => {
       sdk.window.stopAutoResizer();
     };
-
   }, [cma.entry, sdk.editor, sdk.field, sdk.field.validations, sdk.locales.default, sdk.window])
 
 
   const handleOnChange = (event:any) => {
     setSelectValue(event.target.value)
-
     sdk.field.setValue({
       sys: {
         id: event.target.value,
@@ -63,18 +62,10 @@ const Field = () => {
     })
   }
 
-  const optionLabel = (entry:any) => {
-    if(entry.fields.label) {
-      if(entry.fields.label[sdk.field.locale] ) return entry.fields.label[sdk.field.locale]
-      else return entry.fields.label[defaultLocale]
-    }
-    if(entry.fields.title) {
-      if(entry.fields.title[sdk.field.locale] ) return entry.fields.title[sdk.field.locale]
-      else return entry.fields.title[defaultLocale]
-    }
-
-    if(entry.fields[displayField][sdk.field.locale] ) return entry.fields[displayField][sdk.field.locale]
-    else return entry.fields[displayField][defaultLocale]
+  const optionLabel =  (entry: any) => {
+    let df = displayFields[entry.sys.contentType.sys.id]
+    if (entry.fields[df][sdk.field.locale]) return entry.fields[df][sdk.field.locale]
+    else return entry.fields[df][defaultLocale]
   }
 
   return (
