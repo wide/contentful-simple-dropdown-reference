@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import { FieldExtensionSDK } from '@contentful/app-sdk';
 import {useCMA, useSDK} from '@contentful/react-apps-toolkit';
-import { Select } from '@contentful/f36-components';
+import {FormControl, Select} from '@contentful/f36-components';
 
 const Field = () => {
   const [entries, setEntries] = useState([])
@@ -28,10 +28,14 @@ const Field = () => {
       }
       setDisplayFields(dfs)
 
-      const fv:any = await cma.entry.get({
-        entryId: sdk.field.getValue().sys.id
-      })
-      setSelectValue(fv.sys.id)
+      if(sdk.field.getValue()) {
+        const fv:any = await cma.entry.get({
+          entryId: sdk.field.getValue().sys.id
+        })
+        setSelectValue(fv.sys.id)
+      } else {
+        setSelectValue('no-entry')
+      }
 
       const entries: any = await cma.entry.getPublished({
         query: {
@@ -41,7 +45,7 @@ const Field = () => {
       setEntries(entries.items)
     }
 
-    if(sdk.field.getValue()) init()
+    init()
 
     return () => {
       sdk.window.stopAutoResizer();
@@ -51,15 +55,22 @@ const Field = () => {
 
   const handleOnChange = (event:any) => {
     setSelectValue(event.target.value)
-    sdk.field.setValue({
-      sys: {
-        id: event.target.value,
-        linkType: "Entry",
-        type: "Link"
-      }
-    }).then(() => {
+    if(event.target.value === 'no-entry') {
+      sdk.field.removeValue().then(() => {
+        console.log('entry removed')
+      })
+    } else {
+      sdk.field.setValue({
+        sys: {
+          id: event.target.value,
+          linkType: "Entry",
+          type: "Link"
+        }
+      }).then(() => {
         console.log('selected')
-    })
+      })
+    }
+
   }
 
   const optionLabel =  (entry: any) => {
@@ -71,6 +82,7 @@ const Field = () => {
   return (
       <div>
         <Select id={sdk.field.id} name={sdk.field.id} value={selectValue} onChange={handleOnChange}>
+          <Select.Option value="no-entry">Please, select entry ...</Select.Option>
           {entries.map((entry:any) => (
               <Select.Option key={entry.sys.id} value={entry.sys.id}>{optionLabel(entry)}</Select.Option>
           ))}
